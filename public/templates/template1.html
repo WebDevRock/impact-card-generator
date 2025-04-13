@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impact Card</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: red;
+        }
+        .card { 
+            width: 90%; /* Ensure it fits inside the page */
+            max-width: 1000px; /* Prevent it from exceeding the page width */
+            border: 1px solid #ddd; 
+            padding: 30px;
+            text-align: center; 
+            box-sizing: border-box; /* Prevents extra width from padding */
+        }
+        h1 { color: #333; font-size: 24px; }
+        p { font-size: 16px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>{{title}}</h1>
+        <p><strong>Description:</strong> {{description}}</p>
+        <p><strong>Impact Stats:</strong> {{impactStats}}</p>
+        {{image}}
+    </div>
+</body>
+</html>
