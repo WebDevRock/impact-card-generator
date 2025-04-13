@@ -1,18 +1,84 @@
 import { useState } from "react";
+import { useEffect } from "react";
+import Checkbox from "./Checkbox"; // Assuming you have a Checkbox component
 
 const ImpactForm = ({ onGenerate }) => {
     const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        impactStats: "",
+        project: "",
+        introduction: "",
         template: "template1",
+        bgColour: "#ffffff",
+        txtColour: "#000000",
+        image: null,
+        optionalSegments: {
+            includeObjective: false,
+            includeActivity: true,
+            includeAnalysisScope: true,
+            includeAnalysisPurpose: true,
+            includeLocation: true,
+            includeStakeholders: false,
+            includeOutcomes: false,
+            includeSocialROI: false,
+            includeTotalValue: false,
+            includeImpact: true,
+            includeInput: true,
+            includeValueStakeholder: true,
+            includeValueOutcome: true,
+            includeValuePriority: true,
+        },
     });
+
+    const checkboxOptions = [
+        { name: "includeObjective", label: "Objective" },
+        { name: "includeActivity", label: "Activity" },
+        { name: "includeAnalysisScope", label: "Scope of the Analysis" },
+        { name: "includeAnalysisPurpose", label: "Purpose of the Analysis" },
+        { name: "includeLocation", label: "Location" },
+        { name: "includeStakeholders", label: "Stakeholders" },
+        { name: "includeOutcomes", label: "Outcomes" },
+        { name: "includeSocialROI", label: "Social Return on Investment" },
+        { name: "includeTotalValue", label: "Total (Present) Value" },
+        { name: "includeImpact", label: "Impact" },
+        { name: "includeInput", label: "Input" },
+        {
+            name: "includeValueStakeholder",
+            label: "(Present) Value by Stakeholder",
+        },
+        { name: "includeValueOutcome", label: "(Present) Value by Outcome" },
+        { name: "includeValuePriority", label: "(Present) Value by Priority" },
+    ];
+
+    // Split the checkbox options into two columns
+    const midpoint = Math.ceil(checkboxOptions.length / 2);
+    // This will ensure that if the number of optionalSegments is odd, the left column will have one more checkbox than the right column.
+    const leftoptionalSegments = checkboxOptions.slice(0, midpoint);
+    const rightoptionalSegments = checkboxOptions.slice(midpoint);
+
+    const handleOptionalSegmentChange = (e) => {
+        const { name, checked } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            optionalSegments: {
+                ...prev.optionalSegments,
+                [name]: checked,
+            },
+        }));
+    };
+    useEffect(() => {
+        console.log("Form data changed:", formData);
+    }, [formData]);
 
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null); // For live preview
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        console.log(formData);
     };
 
     const handleImageChange = (e) => {
@@ -59,53 +125,116 @@ const ImpactForm = ({ onGenerate }) => {
     return (
         <div className="flex flex-wrap justify-center gap-6">
             {/* Left Side: Form */}
-            <div className="max-w-lg p-6 bg-white shadow-lg rounded-lg">
+            <div className="max-w-lg min-w-full p-6 bg-white shadow-lg rounded-lg">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">
                     Create Impact Card
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
-                            Title
+                            Choose Project
                         </label>
-                        <input
-                            type="text"
-                            name="title"
-                            value={formData.title}
+                        <select
+                            name="project"
+                            value={formData.project}
                             onChange={handleChange}
-                            required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        />
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 "
+                        >
+                            <option value="project1">Project 1</option>
+                            <option value="project2">Project 2</option>
+                            <option value="project3">Project 3</option>
+                        </select>
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
-                            Description
+                            Introduction
                         </label>
                         <textarea
-                            name="description"
-                            value={formData.description}
+                            name="introduction"
+                            value={formData.introduction}
                             onChange={handleChange}
                             required
                             rows="3"
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Provide a short background about your organisation and/or project. This will be used as an introductionary section to your impact card."
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
                         ></textarea>
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
-                            Impact Stats
+                            Choose the items you wish to include on your impact
+                            card
                         </label>
-                        <input
-                            type="text"
-                            name="impactStats"
-                            value={formData.impactStats}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        />
+                        <div className="flex mb-4">
+                            {/* Left checkbox column */}
+                            <div className="w-1/2">
+                                {leftoptionalSegments.map(({ name, label }) => (
+                                    <Checkbox
+                                        key={name}
+                                        name={name}
+                                        label={label}
+                                        checked={
+                                            formData.optionalSegments[name]
+                                        }
+                                        onChange={handleOptionalSegmentChange}
+                                    />
+                                ))}
+                            </div>
+
+                            {/* Right side of check boxes */}
+                            <div className="w-1/2">
+                                {rightoptionalSegments.map(
+                                    ({ name, label }) => (
+                                        <Checkbox
+                                            key={name}
+                                            name={name}
+                                            label={label}
+                                            checked={
+                                                formData.optionalSegments[name]
+                                            }
+                                            onChange={
+                                                handleOptionalSegmentChange
+                                            }
+                                        />
+                                    )
+                                )}
+                            </div>
+                        </div>
                     </div>
 
+                    <div>
+                        <label
+                            className="block text-sm font-medium mb-2 dark:text-white"
+                        >
+                            Background
+                        </label>
+                        <input
+                            type="color"
+                            className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700"
+                            title="Choose your color"
+                            name="bgColour"
+                            id="bgColour"
+                            value={formData.bgColour}
+                            onChange={handleChange}
+                        ></input>
+                    </div>
+                    <div>
+                        <label
+                            className="block text-sm font-medium mb-2 dark:text-white"
+                        >
+                            Text colour
+                        </label>
+                        <input
+                            type="color"
+                            className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700"
+                            title="Choose your color"
+                            id="txtColour"
+                            name="txtColour"
+                            onChange={handleChange}
+                            value={formData.txtColour}
+                        ></input>
+                    </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
                             Choose Template
@@ -142,39 +271,6 @@ const ImpactForm = ({ onGenerate }) => {
                         </button>
                     </div>
                 </form>
-            </div>
-
-            {/* Right Side: Live Preview */}
-            <div className="max-w-lg p-6 bg-gray-100 shadow-lg rounded-lg">
-                <h2 className="text-xl font-bold mb-4 text-gray-800">
-                    Live Preview
-                </h2>
-                <div
-                    className={`border rounded-md p-4 text-center ${getTemplateStyle()}`}
-                >
-                    <h1 className="text-2xl font-bold">
-                        {formData.title || "Your Title Here"}
-                    </h1>
-                    <p className="mt-2">
-                        <strong>Description:</strong>{" "}
-                        {formData.description ||
-                            "Your description will appear here."}
-                    </p>
-                    <p className="mt-2">
-                        <strong>Impact Stats:</strong>{" "}
-                        {formData.impactStats ||
-                            "Impact stats will be displayed here."}
-                    </p>
-
-                    {/* Image Preview */}
-                    {imagePreview && (
-                        <img
-                            src={imagePreview}
-                            alt="Uploaded Preview"
-                            className="mt-4 max-w-full h-auto mx-auto rounded-md shadow-md"
-                        />
-                    )}
-                </div>
             </div>
         </div>
     );
