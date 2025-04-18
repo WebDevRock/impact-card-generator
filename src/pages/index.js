@@ -30,13 +30,13 @@ export default function Home() {
 
             {pdfUrl && (
                 <div className="text-center mt-4">
-                    <h2 className="text-lg font-semibold">Download Your PDF</h2>
+                    <h2 className="text-lg font-semibold">Download Your Impact Card</h2>
                     <a
                         href={pdfUrl}
                         download="ImpactCard.pdf"
                         className="mt-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow"
                     >
-                        Download PDF
+                        Download
                     </a>
                 </div>
             )}

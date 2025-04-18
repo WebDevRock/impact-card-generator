@@ -4,22 +4,22 @@ import Checkbox from "./Checkbox"; // Assuming you have a Checkbox component
 
 const ImpactForm = ({ onGenerate }) => {
     const [formData, setFormData] = useState({
-        project: "",
+        project: "project 2",
         introduction: "",
-        template: "template1",
+        template: "template3",
         bgColour: "#ffffff",
         txtColour: "#000000",
         image: null,
         optionalSegments: {
-            includeObjective: false,
+            includeObjective: true,
             includeActivity: true,
             includeAnalysisScope: true,
             includeAnalysisPurpose: true,
             includeLocation: true,
-            includeStakeholders: false,
-            includeOutcomes: false,
-            includeSocialROI: false,
-            includeTotalValue: false,
+            includeStakeholders: true,
+            includeOutcomes: true,
+            includeSocialROI: true,
+            includeTotalValue: true,
             includeImpact: true,
             includeInput: true,
             includeValueStakeholder: true,
@@ -99,14 +99,20 @@ const ImpactForm = ({ onGenerate }) => {
         e.preventDefault();
 
         const formDataToSend = new FormData();
+
         Object.entries(formData).forEach(([key, value]) => {
-            formDataToSend.append(key, value);
+            if (typeof value === "object" && value !== null) {
+                formDataToSend.append(key, JSON.stringify(value)); // Handle objects like checkboxes
+            } else {
+                formDataToSend.append(key, value);
+            }
         });
 
         if (image) {
             formDataToSend.append("image", image);
         }
 
+        console.log("Form data to send:", formDataToSend);
         onGenerate(formDataToSend);
     };
 
@@ -140,9 +146,9 @@ const ImpactForm = ({ onGenerate }) => {
                             onChange={handleChange}
                             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 "
                         >
-                            <option value="project1">Project 1</option>
-                            <option value="project2">Project 2</option>
-                            <option value="project3">Project 3</option>
+                            <option value="project 1">Project 1</option>
+                            <option value="project 2">Project 2</option>
+                            <option value="project 3">Project 3</option>
                         </select>
                     </div>
 
@@ -204,9 +210,7 @@ const ImpactForm = ({ onGenerate }) => {
                     </div>
 
                     <div>
-                        <label
-                            className="block text-sm font-medium mb-2 dark:text-white"
-                        >
+                        <label className="block text-sm font-medium mb-2 dark:text-white">
                             Background
                         </label>
                         <input
@@ -220,9 +224,7 @@ const ImpactForm = ({ onGenerate }) => {
                         ></input>
                     </div>
                     <div>
-                        <label
-                            className="block text-sm font-medium mb-2 dark:text-white"
-                        >
+                        <label className="block text-sm font-medium mb-2 dark:text-white">
                             Text colour
                         </label>
                         <input
@@ -235,7 +237,7 @@ const ImpactForm = ({ onGenerate }) => {
                             value={formData.txtColour}
                         ></input>
                     </div>
-                    <div>
+                    {/* <div>
                         <label className="block text-sm font-medium text-gray-700">
                             Choose Template
                         </label>
@@ -247,12 +249,13 @@ const ImpactForm = ({ onGenerate }) => {
                         >
                             <option value="template1">Simple Design</option>
                             <option value="template2">Classic Design</option>
+                            <option value="template3">Masonary Design</option>
                         </select>
-                    </div>
+                    </div> */}
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
-                            Upload Image (Optional)
+                            Upload Your Logo
                         </label>
                         <input
                             type="file"
@@ -267,7 +270,7 @@ const ImpactForm = ({ onGenerate }) => {
                             type="submit"
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow"
                         >
-                            Generate PDF
+                            Generate Impact Card
                         </button>
                     </div>
                 </form>
