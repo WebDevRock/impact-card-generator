@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import Checkbox from "./Checkbox"; // Assuming you have a Checkbox component
+import LivePreview from "./LivePreview";
 
 const ImpactForm = ({ onGenerate }) => {
     const [formData, setFormData] = useState({
@@ -111,8 +112,7 @@ const ImpactForm = ({ onGenerate }) => {
         if (image) {
             formDataToSend.append("image", image);
         }
-
-        console.log("Form data to send:", formDataToSend);
+        
         onGenerate(formDataToSend);
     };
 
@@ -275,6 +275,16 @@ const ImpactForm = ({ onGenerate }) => {
                     </div>
                 </form>
             </div>
+            <LivePreview
+    formData={formData}
+    imagePreview={imagePreview}
+    chartImages={{
+        chart1Image: "", // optional base64 images if available
+        chart2Image: "",
+        chart3Image: "",
+    }}
+/>
+
         </div>
     );
 };
