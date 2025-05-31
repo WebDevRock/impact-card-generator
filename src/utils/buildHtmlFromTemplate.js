@@ -1,7 +1,12 @@
 export async function buildHtmlFromTemplate({
     template,
+    bannerImage,
+    backgroundImage,
     introduction,
     bgColour,
+    cardBgColour,   
+    cardTitleColour,
+    cardTextColour,
     txtColour,
     project,
     optionalSegments,
@@ -26,8 +31,14 @@ export async function buildHtmlFromTemplate({
     }
 
     htmlContent = htmlContent
+        .replace("{{bannerImage}}", bannerImage || "")
+        .replace("{{#bannerImage}}", bannerImage ? "" : "<!--")
+        .replace("{{/bannerImage}}", bannerImage ? "" : "-->")
         .replace("{{introduction}}", introduction.replace(/\n/g, "<br>"))
         .replace("{{backgroundColour}}", bgColour)
+        .replace("{{cardBgColour}}", cardBgColour)
+        .replace("{{cardTitleColour}}", cardTitleColour)
+        .replace("{{cardTextColour}}", cardTextColour)
         .replace("{{textColour}}", txtColour)
         .replace("{{sroiValue}}", sroiValue)
         .replace("{{project}}", project.replace(/\n/g, "<br>"));

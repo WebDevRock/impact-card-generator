@@ -1,15 +1,24 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import Checkbox from "./Checkbox"; // Assuming you have a Checkbox component
+import Checkbox from "./Checkbox";
 import LivePreview from "./LivePreview";
-
+import ImpactCustomCard from "@/components/ImpactCustomCard";
+import SlideInPanel from "@/components/SlideInPanel";
+4, 109, 139;
 const ImpactForm = ({ onGenerate }) => {
     const [formData, setFormData] = useState({
-        project: "project 2",
-        introduction: "",
+        project: "Project 2",
+        introduction:
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         template: "template3",
-        bgColour: "#ffffff",
-        txtColour: "#000000",
+        bgColour: "#046D8B",
+        txtColour: "#FFFFFF",
+        cardBgColour: "#FFFFFF",
+        cardTitleColour: "#046D8B",
+        cardTextColour: "#046D8B",
+        bannerImage: null,
+        backgroundImage: null,
+        fontSize: "M",
         image: null,
         optionalSegments: {
             includeObjective: true,
@@ -54,7 +63,7 @@ const ImpactForm = ({ onGenerate }) => {
     // This will ensure that if the number of optionalSegments is odd, the left column will have one more checkbox than the right column.
     const leftoptionalSegments = checkboxOptions.slice(0, midpoint);
     const rightoptionalSegments = checkboxOptions.slice(midpoint);
-
+    const [showPanel, setShowPanel] = useState(false);
     const handleOptionalSegmentChange = (e) => {
         const { name, checked } = e.target;
         setFormData((prev) => ({
@@ -66,12 +75,20 @@ const ImpactForm = ({ onGenerate }) => {
         }));
     };
     useEffect(() => {
-        console.log("Form data changed:", formData);
+        // console.log("Form data changed:", formData);
     }, [formData]);
-
+    const [loading, setLoading] = useState(false);
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null); // For live preview
 
+    const fileToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result); // base64 string
+            reader.onerror = reject;
+            reader.readAsDataURL(file); // converts to data URI
+        });
+    };
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -96,24 +113,65 @@ const ImpactForm = ({ onGenerate }) => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const formDataToSend = new FormData();
-
         Object.entries(formData).forEach(([key, value]) => {
             if (typeof value === "object" && value !== null) {
-                formDataToSend.append(key, JSON.stringify(value)); // Handle objects like checkboxes
+                formDataToSend.append(key, JSON.stringify(value));
             } else {
                 formDataToSend.append(key, value);
             }
         });
-
         if (image) {
             formDataToSend.append("image", image);
         }
-        
-        onGenerate(formDataToSend);
+        if (formData.bannerImage) {
+            formDataToSend.append("bannerImage", formData.bannerImage);
+        }
+        if (formData.backgroundImage) {
+            formDataToSend.append("backgroundImage", formData.backgroundImage);
+        }
+
+        if (formData.bannerImage instanceof File) {
+            formDataToSend.bannerImage = await fileToBase64(formData.bannerImage);
+        }
+
+        if (formData.backgroundImage instanceof File) {
+            formDataToSend.backgroundImage = await fileToBase64(
+                formData.backgroundImage
+            );
+        }
+
+        try {
+            const response = await fetch("/api/generate-pdf", {
+                method: "POST",
+                body: formDataToSend,
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to generate PDF");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "ImpactCard.pdf";
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("PDF Generation Failed:", err);
+            alert(
+                "There was an error generating your Impact Card. Please try again."
+            );
+        }
     };
 
     // 🔹 Dynamic Template Styles for Preview
@@ -135,6 +193,14 @@ const ImpactForm = ({ onGenerate }) => {
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">
                     Create Impact Card
                 </h2>
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={() => setShowPanel(true)}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded shadow"
+                    >
+                        ⚙️ Style Impact Card
+                    </button>
+                </div>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
@@ -146,9 +212,9 @@ const ImpactForm = ({ onGenerate }) => {
                             onChange={handleChange}
                             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 "
                         >
-                            <option value="project 1">Project 1</option>
-                            <option value="project 2">Project 2</option>
-                            <option value="project 3">Project 3</option>
+                            <option value="Project 1">Project 1</option>
+                            <option value="Project 2">Project 2</option>
+                            <option value="Project 3">Project 3</option>
                         </select>
                     </div>
 
@@ -209,34 +275,6 @@ const ImpactForm = ({ onGenerate }) => {
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2 dark:text-white">
-                            Background
-                        </label>
-                        <input
-                            type="color"
-                            className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700"
-                            title="Choose your color"
-                            name="bgColour"
-                            id="bgColour"
-                            value={formData.bgColour}
-                            onChange={handleChange}
-                        ></input>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-2 dark:text-white">
-                            Text colour
-                        </label>
-                        <input
-                            type="color"
-                            className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700"
-                            title="Choose your color"
-                            id="txtColour"
-                            name="txtColour"
-                            onChange={handleChange}
-                            value={formData.txtColour}
-                        ></input>
-                    </div>
                     {/* <div>
                         <label className="block text-sm font-medium text-gray-700">
                             Choose Template
@@ -252,6 +290,10 @@ const ImpactForm = ({ onGenerate }) => {
                             <option value="template3">Masonary Design</option>
                         </select>
                     </div> */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700"></label>
+                        <ImpactCustomCard />
+                    </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
@@ -276,15 +318,20 @@ const ImpactForm = ({ onGenerate }) => {
                 </form>
             </div>
             <LivePreview
-    formData={formData}
-    imagePreview={imagePreview}
-    chartImages={{
-        chart1Image: "", // optional base64 images if available
-        chart2Image: "",
-        chart3Image: "",
-    }}
-/>
-
+                formData={formData}
+                imagePreview={imagePreview}
+                chartImages={{
+                    chart1Image: "", // optional base64 images if available
+                    chart2Image: "",
+                    chart3Image: "",
+                }}
+            />
+            <SlideInPanel
+                formData={formData}
+                setFormData={setFormData}
+                show={showPanel}
+                onClose={() => setShowPanel(false)}
+            />
         </div>
     );
 };

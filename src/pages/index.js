@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import ImpactForm from "../components/ImpactForm";
 
+
 export default function Home() {
     const [pdfUrl, setPdfUrl] = useState(null);
 
@@ -27,6 +28,7 @@ export default function Home() {
         <div className="container mx-auto p-6">
             <h1 className="text-3xl font-bold mb-6 text-center">Impact Card Generator</h1>
             <ImpactForm onGenerate={generatePDF} />
+            
 
             {pdfUrl && (
                 <div className="text-center mt-4">
