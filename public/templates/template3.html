@@ -71,10 +71,10 @@
     </head>
     <body class="text-gray-900 p-6">
         {{#bannerImage}}
-    <div class="w-full">
+    <div class="w-full mb-4">
         <img src="{{bannerImage}}" alt="Banner Image" class="w-full object-cover max-h-60" />
     </div>
-{{/bannerImage}}
+        {{/bannerImage}}
         <div class="break-inside-avoid max-w-6xl mx-auto">
             <section
                 class="break-inside-avoid columns-1 sm:columns-2 md:columns-2 gap-4"
@@ -312,7 +312,7 @@
                 "
             >
                 {{includeValueStakeholderStart}}
-                <div class="sve-card mb-4 p-4 rounded-lg ">
+                <div class="sve-card mb-0 p-4 rounded-lg ">
                     <!-- Stakeholder Content -->
                     <h2 class="sve-card-title text-l font-semibold  mb-2">
                         Present Value by Stakeholder
@@ -325,7 +325,7 @@
                     </div>
                 </div>
                 {{includeValueStakeholderEnd}} {{includeValueOutcomeStart}}
-                <div class="sve-card mb-4 p-4 rounded-lg">
+                <div class="sve-card mb-0 p-4 rounded-lg">
                     <!-- Outcome Content -->
                     <h2 class="sve-card-title text-l font-semibold  mb-2">
                         Present Value by Outcome

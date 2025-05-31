@@ -8,7 +8,9 @@ import { buildHtmlFromTemplate } from "../../utils/buildHtmlFromTemplate";
 
 export const config = {
     api: {
-        bodyParser: false,
+        bodyParser: {
+            sizeLimit: "10mb", // ⬅️ Adjust as needed
+        },
     },
 };
 
@@ -16,16 +18,28 @@ const width = 700;
 const height = 250;
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 
-const upload = multer({ storage: multer.memoryStorage() });
-const uploadMiddleware = promisify(upload.single("image"));
+// const upload = multer({ storage: multer.memoryStorage() });
+// const uploadMiddleware = promisify(upload.single("image"));
 
 export default async function handler(req, res) {
+    // console.log("Request body:", req.body);
     try {
-        await uploadMiddleware(req, res);
-
-        const { project, introduction, bgColour, cardTitleColour, cardBgColour, cardTextColour, txtColour, template, bannerImage } =
-            req.body;
-        const optionalSegments = JSON.parse(req.body.optionalSegments);
+        // await uploadMiddleware(req, res);
+        // console.log("Request :", req.body);
+        const {
+            project,
+            introduction,
+            bgColour,
+            cardTitleColour,
+            cardBgColour,
+            cardTextColour,
+            txtColour,
+            template,
+            bannerImage,
+            backgroundImage,
+            logoImage,
+        } = req.body;
+        const optionalSegments = req.body.optionalSegments;
 
         const configuration1 = {
             type: "doughnut", // or 'doughnut'
@@ -136,26 +150,26 @@ export default async function handler(req, res) {
         };
 
         const chart1Image = await chartJSNodeCanvas.renderToDataURL({
-           configuration1
+            configuration1,
         });
         const chart2Image = await chartJSNodeCanvas.renderToDataURL({
-           configuration2
+            configuration2,
         });
         const chart3Image = await chartJSNodeCanvas.renderToDataURL({
-           configuration3
+            configuration3,
         });
 
-        let logoImage = "";
-        if (req.file) {
-            logoImage = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
-        } else {
-            const fallbackPath = path.join(
-                process.cwd(),
-                "public/social-value-engine-logo.png"
-            );
-            const imageBuffer = fs.readFileSync(fallbackPath);
-            logoImage = `data:image/png;base64,${imageBuffer.toString("base64")}`;
-        }
+        // let logoImage = "";
+        // if (req.file) {
+        //     logoImage = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+        // } else {
+        //     const fallbackPath = path.join(
+        //         process.cwd(),
+        //         "public/social-value-engine-logo.png"
+        //     );
+        //     const imageBuffer = fs.readFileSync(fallbackPath);
+        //     logoImage = `data:image/png;base64,${imageBuffer.toString("base64")}`;
+        // }
 
         const htmlContent = await buildHtmlFromTemplate({
             template,

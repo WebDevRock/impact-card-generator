@@ -19,7 +19,7 @@ const ImpactForm = ({ onGenerate }) => {
         bannerImage: null,
         backgroundImage: null,
         fontSize: "M",
-        image: null,
+        logoImage: null,
         optionalSegments: {
             includeObjective: true,
             includeActivity: true,
@@ -81,13 +81,30 @@ const ImpactForm = ({ onGenerate }) => {
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null); // For live preview
 
-    const fileToBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result); // base64 string
-            reader.onerror = reject;
-            reader.readAsDataURL(file); // converts to data URI
-        });
+    // const fileToBase64 = (file) => {
+    //     return new Promise((resolve, reject) => {
+    //         const reader = new FileReader();
+    //         reader.onload = () => resolve(reader.result); // base64 string
+    //         reader.onerror = reject;
+    //         reader.readAsDataURL(file); // converts to data URI
+    //     });
+    // };
+    const compressAndConvertToBase64 = async (file) => {
+        const options = {
+            maxSizeMB: 0.5, // Target file size (e.g., 500KB)
+            maxWidthOrHeight: 1920, // Resize large images
+            useWebWorker: true,
+        };
+
+        try {
+            const compressedFile = await imageCompression(file, options);
+            const base64 =
+                await imageCompression.getDataUrlFromFile(compressedFile);
+            return base64;
+        } catch (error) {
+            console.error("Image compression failed:", error);
+            return null;
+        }
     };
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -96,7 +113,7 @@ const ImpactForm = ({ onGenerate }) => {
             [name]: value,
         }));
 
-        console.log(formData);
+        // console.log(formData);
     };
 
     const handleImageChange = (e) => {
@@ -113,41 +130,101 @@ const ImpactForm = ({ onGenerate }) => {
         }
     };
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     const formDataToSend = new FormData();
+    //     Object.entries(formData).forEach(([key, value]) => {
+    //         if (typeof value === "object" && value !== null) {
+    //             formDataToSend.append(key, JSON.stringify(value));
+    //         } else {
+    //             formDataToSend.append(key, value);
+    //         }
+    //     });
+    //     if (formData.logoImage) {
+    //         formDataToSend.append("logoImage", formData.logoImage);
+    //     }
+    //     if (formData.bannerImage) {
+    //         formDataToSend.append("bannerImage", formData.bannerImage);
+    //     }
+    //     if (formData.backgroundImage) {
+    //         formDataToSend.append("backgroundImage", formData.backgroundImage);
+    //     }
+
+    //     if (formData.bannerImage instanceof File) {
+    //         formDataToSend.bannerImage = await fileToBase64(formData.bannerImage);
+    //     }
+
+    //     if (formData.backgroundImage instanceof File) {
+    //         formDataToSend.backgroundImage = await fileToBase64(
+    //             formData.backgroundImage
+    //         );
+    //     }
+
+    //     try {
+    //         const response = await fetch("/api/generate-pdf", {
+    //             method: "POST",
+    //             body: formDataToSend,
+    //         });
+
+    //         if (!response.ok) {
+    //             throw new Error("Failed to generate PDF");
+    //         }
+
+    //         const blob = await response.blob();
+    //         const url = window.URL.createObjectURL(blob);
+
+    //         const a = document.createElement("a");
+    //         a.href = url;
+    //         a.download = "ImpactCard.pdf";
+    //         a.style.display = "none";
+    //         document.body.appendChild(a);
+    //         a.click();
+    //         document.body.removeChild(a);
+
+    //         window.URL.revokeObjectURL(url);
+    //     } catch (err) {
+    //         console.error("PDF Generation Failed:", err);
+    //         alert(
+    //             "There was an error generating your Impact Card. Please try again."
+    //         );
+    //     }
+    // };
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const formDataToSend = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            if (typeof value === "object" && value !== null) {
-                formDataToSend.append(key, JSON.stringify(value));
-            } else {
-                formDataToSend.append(key, value);
-            }
-        });
-        if (image) {
-            formDataToSend.append("image", image);
-        }
-        if (formData.bannerImage) {
-            formDataToSend.append("bannerImage", formData.bannerImage);
-        }
-        if (formData.backgroundImage) {
-            formDataToSend.append("backgroundImage", formData.backgroundImage);
-        }
+        // Clone form data and convert images to base64
+        const payload = { ...formData };
+
+        const toBase64 = (file) =>
+            new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
 
         if (formData.bannerImage instanceof File) {
-            formDataToSend.bannerImage = await fileToBase64(formData.bannerImage);
+            payload.bannerImage = await toBase64(formData.bannerImage);
+        } else {
+            payload.bannerImage = formData.bannerImage || null;
         }
 
         if (formData.backgroundImage instanceof File) {
-            formDataToSend.backgroundImage = await fileToBase64(
-                formData.backgroundImage
-            );
+            payload.backgroundImage = await toBase64(formData.backgroundImage);
+        }
+
+        if (formData.logoImage instanceof File) {
+            payload.logoImage = await toBase64(formData.logoImage);
         }
 
         try {
             const response = await fetch("/api/generate-pdf", {
                 method: "POST",
-                body: formDataToSend,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
