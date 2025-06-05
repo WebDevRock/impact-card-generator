@@ -4,6 +4,8 @@ import Checkbox from "./Checkbox";
 import LivePreview from "./LivePreview";
 import ImpactCustomCard from "@/components/ImpactCustomCard";
 import SlideInPanel from "@/components/SlideInPanel";
+import { compressAndConvertToBase64 } from "@/utils/imageUtils";
+
 4, 109, 139;
 const ImpactForm = ({ onGenerate }) => {
     const [formData, setFormData] = useState({
@@ -75,37 +77,29 @@ const ImpactForm = ({ onGenerate }) => {
         }));
     };
     useEffect(() => {
-        // console.log("Form data changed:", formData);
+        console.log("Form data changed:", formData);
     }, [formData]);
     const [loading, setLoading] = useState(false);
-    const [image, setImage] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null); // For live preview
+    
+    
 
-    // const fileToBase64 = (file) => {
-    //     return new Promise((resolve, reject) => {
-    //         const reader = new FileReader();
-    //         reader.onload = () => resolve(reader.result); // base64 string
-    //         reader.onerror = reject;
-    //         reader.readAsDataURL(file); // converts to data URI
-    //     });
+    // const compressAndConvertToBase64 = async (file) => {
+    //     const options = {
+    //         maxSizeMB: 0.5, // Target file size (e.g., 500KB)
+    //         maxWidthOrHeight: 1920, // Resize large images
+    //         useWebWorker: true,
+    //     };
+
+    //     try {
+    //         const compressedFile = await imageCompression(file, options);
+    //         const base64 =
+    //             await imageCompression.getDataUrlFromFile(compressedFile);
+    //         return base64;
+    //     } catch (error) {
+    //         console.error("Image compression failed:", error);
+    //         return null;
+    //     }
     // };
-    const compressAndConvertToBase64 = async (file) => {
-        const options = {
-            maxSizeMB: 0.5, // Target file size (e.g., 500KB)
-            maxWidthOrHeight: 1920, // Resize large images
-            useWebWorker: true,
-        };
-
-        try {
-            const compressedFile = await imageCompression(file, options);
-            const base64 =
-                await imageCompression.getDataUrlFromFile(compressedFile);
-            return base64;
-        } catch (error) {
-            console.error("Image compression failed:", error);
-            return null;
-        }
-    };
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -116,80 +110,18 @@ const ImpactForm = ({ onGenerate }) => {
         // console.log(formData);
     };
 
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e, type) => {
         const file = e.target.files[0];
-        setImage(file);
+        if (!file) return;
 
-        // Create a preview of the image
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
+        const base64 = await compressAndConvertToBase64(file);
+
+        setFormData((prev) => ({
+            ...prev,
+            [type]: base64, 
+        }));
     };
-
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-
-    //     const formDataToSend = new FormData();
-    //     Object.entries(formData).forEach(([key, value]) => {
-    //         if (typeof value === "object" && value !== null) {
-    //             formDataToSend.append(key, JSON.stringify(value));
-    //         } else {
-    //             formDataToSend.append(key, value);
-    //         }
-    //     });
-    //     if (formData.logoImage) {
-    //         formDataToSend.append("logoImage", formData.logoImage);
-    //     }
-    //     if (formData.bannerImage) {
-    //         formDataToSend.append("bannerImage", formData.bannerImage);
-    //     }
-    //     if (formData.backgroundImage) {
-    //         formDataToSend.append("backgroundImage", formData.backgroundImage);
-    //     }
-
-    //     if (formData.bannerImage instanceof File) {
-    //         formDataToSend.bannerImage = await fileToBase64(formData.bannerImage);
-    //     }
-
-    //     if (formData.backgroundImage instanceof File) {
-    //         formDataToSend.backgroundImage = await fileToBase64(
-    //             formData.backgroundImage
-    //         );
-    //     }
-
-    //     try {
-    //         const response = await fetch("/api/generate-pdf", {
-    //             method: "POST",
-    //             body: formDataToSend,
-    //         });
-
-    //         if (!response.ok) {
-    //             throw new Error("Failed to generate PDF");
-    //         }
-
-    //         const blob = await response.blob();
-    //         const url = window.URL.createObjectURL(blob);
-
-    //         const a = document.createElement("a");
-    //         a.href = url;
-    //         a.download = "ImpactCard.pdf";
-    //         a.style.display = "none";
-    //         document.body.appendChild(a);
-    //         a.click();
-    //         document.body.removeChild(a);
-
-    //         window.URL.revokeObjectURL(url);
-    //     } catch (err) {
-    //         console.error("PDF Generation Failed:", err);
-    //         alert(
-    //             "There was an error generating your Impact Card. Please try again."
-    //         );
-    //     }
-    // };
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -205,17 +137,23 @@ const ImpactForm = ({ onGenerate }) => {
             });
 
         if (formData.bannerImage instanceof File) {
-            payload.bannerImage = await toBase64(formData.bannerImage);
+            payload.bannerImage = await compressAndConvertToBase64(
+                formData.bannerImage
+            );
         } else {
             payload.bannerImage = formData.bannerImage || null;
         }
 
         if (formData.backgroundImage instanceof File) {
-            payload.backgroundImage = await toBase64(formData.backgroundImage);
+            payload.backgroundImage = await compressAndConvertToBase64(
+                formData.backgroundImage
+            );
         }
 
         if (formData.logoImage instanceof File) {
-            payload.logoImage = await toBase64(formData.logoImage);
+            payload.logoImage = await compressAndConvertToBase64(
+                formData.logoImage
+            );
         }
 
         try {
@@ -379,7 +317,7 @@ const ImpactForm = ({ onGenerate }) => {
                         <input
                             type="file"
                             accept="image/*"
-                            onChange={handleImageChange}
+                            onChange={(e) => handleImageChange(e, "logoImage")}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
@@ -394,19 +332,12 @@ const ImpactForm = ({ onGenerate }) => {
                     </div>
                 </form>
             </div>
-            <LivePreview
-                formData={formData}
-                imagePreview={imagePreview}
-                chartImages={{
-                    chart1Image: "", // optional base64 images if available
-                    chart2Image: "",
-                    chart3Image: "",
-                }}
-            />
+            <LivePreview formData={formData} />
             <SlideInPanel
                 formData={formData}
                 setFormData={setFormData}
                 show={showPanel}
+                onImageChange={handleImageChange}
                 onClose={() => setShowPanel(false)}
             />
         </div>

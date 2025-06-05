@@ -6,11 +6,7 @@ export default function LivePreview({ formData }) {
 
     useEffect(() => {
         const generate = async () => {
-            const logoImage = formData.imagePreview; // base64
-            const html = await buildHtmlFromTemplate({
-                ...formData,
-                logoImage,
-            });
+            const html = await buildHtmlFromTemplate(formData);
             setHtml(html);
         };
         generate();

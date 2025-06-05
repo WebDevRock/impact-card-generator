@@ -31,10 +31,23 @@
             @page {
                 margin: 0;
             }
+            body::before {
+                content: "";
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.3); /* or use linear-gradient */
+                z-index: -1;
+            }
             body {
                 margin: 0;
                 background-color: var(--sve-primary);
                 color: var(--sve-secondary);
+                background-image: url("{{backgroundImage}}"); /* new */
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
 
             }
             .pdf-top-margin {
@@ -79,11 +92,12 @@
             <section
                 class="break-inside-avoid columns-1 sm:columns-2 md:columns-2 gap-4"
             >
+                {{#logoImage}}
                 <div class="break-inside-avoid mb-4 mt-0">
                     <img src="{{logoImage}}" class="w-fit mt-0" />
                 </div>
-
-                <div class="introCard break-inside-avoid mb-4">
+                {{/logoImage}}
+                <div class="introCard break-inside-avoid mb-4 p-4">
                     <h1 class="text-4xl mb-4">{{project}}</h1>
                     <span class="">{{introduction}}</span>
                 </div>

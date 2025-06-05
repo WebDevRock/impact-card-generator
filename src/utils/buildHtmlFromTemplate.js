@@ -11,10 +11,10 @@ export async function buildHtmlFromTemplate({
     project,
     optionalSegments,
     sroiValue = "4.97",
-    logoImage = "",
-    chart1Image = "",
-    chart2Image = "",
-    chart3Image = "",
+    logoImage,
+    chart1Image,
+    chart2Image,
+    chart3Image,
 }) {
     let htmlContent = "";
 
@@ -34,8 +34,12 @@ export async function buildHtmlFromTemplate({
         .replace("{{bannerImage}}", bannerImage || "")
         .replace("{{#bannerImage}}", bannerImage ? "" : "<!--")
         .replace("{{/bannerImage}}", bannerImage ? "" : "-->")
+        .replace("{{logoImage}}", logoImage || "")
+        .replace("{{#logoImage}}", logoImage ? "" : "<!--")
+        .replace("{{/logoImage}}", logoImage ? "" : "-->")
         .replace("{{introduction}}", introduction.replace(/\n/g, "<br>"))
         .replace("{{backgroundColour}}", bgColour)
+        .replace("{{backgroundImage}}", backgroundImage || "")
         .replace("{{cardBgColour}}", cardBgColour)
         .replace("{{cardTitleColour}}", cardTitleColour)
         .replace("{{cardTextColour}}", cardTextColour)
@@ -53,7 +57,6 @@ export async function buildHtmlFromTemplate({
     });
 
     htmlContent = htmlContent
-        .replace("{{logoImage}}", logoImage)
         .replace("{{StakeholderChart}}", chart1Image)
         .replace("{{OutcomeChart}}", chart2Image)
         .replace("{{PriorityChart}}", chart3Image);

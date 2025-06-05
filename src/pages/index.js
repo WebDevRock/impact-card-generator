@@ -27,10 +27,17 @@ export default function Home() {
             }
 
             if (formData.backgroundImage instanceof File) {
-                payload.backgroundImage = await toBase64(
+                payload.backgroundImage = await compressAndConvertToBase64(
                     formData.backgroundImage
                 );
             }
+            
+            if (formData.logoImage instanceof File) {
+                payload.logoImage = await compressAndConvertToBase64(
+                    formData.logoImage
+                );
+            }
+
 
             console.log("Payload for PDF generation:", payload);
 
